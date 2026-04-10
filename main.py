@@ -21,7 +21,7 @@ def main():
     draw = ImageDraw.Draw(img)
     
     # 下载一个免费的黑体中文字体（防止云端电脑没有中文字体显示乱码）
-   font_path = "kaiti.ttf"  # 直接读取你刚才上传的楷体文件
+    font_path = "kaiti.ttf"  # 直接读取你刚才上传的楷体文件
     
     # 设置字体大小（标题稍微大点，内容小点）
     font_title = ImageFont.truetype(font_path, 26)
