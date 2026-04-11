@@ -49,44 +49,33 @@ def push_image(img, page_id):
     except Exception as e:
         print(f"推送第 {page_id} 页失败:", e)
 
-# ================= 页面 1：微博热搜 (狡兔三窟版) =================
-def page1_weibo():
-    print("获取微博热搜...")
+# ================= 页面 1：知乎热榜 (极其稳定，不封海外IP) =================
+def page1_zhihu():
+    print("获取知乎热榜...")
     img = Image.new('1', (400, 300), color=255)
     draw = ImageDraw.Draw(img)
     
-    # 准备了 3 个免费的第三方热搜聚合 API，轮流尝试
-    apis = [
-        "https://api.vvhan.com/api/hotlist/wbHot",
-        "https://tenapi.cn/v2/weibohot",
-        "https://api.suyanw.cn/api/weibohot.php"
-    ]
-    
     items = []
-    for api_url in apis:
-        try:
-            print(f"尝试使用接口: {api_url}")
-            res = requests.get(api_url, headers=HEADERS, timeout=8).json()
-            # 兼容不同接口的返回格式
-            data_list = res.get('data', [])
-            if isinstance(data_list, list) and len(data_list) > 0:
-                for item in data_list[:8]:
-                    title = item.get('title') or item.get('name') or item.get('word')
-                    if title:
-                        items.append(title)
-            if len(items) >= 5:
-                print("获取微博数据成功！")
-                break # 获取成功，跳出循环
-        except Exception as e:
-            print(f"该接口失败，尝试下一个...")
-            continue
-            
-    if not items:
-        items = ["各大接口当前均受限，稍后自动重试..."] * 8
+    try:
+        # 知乎官方的开源热榜接口，对 GitHub 非常友好
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        url = "https://api.zhihu.com/topstory/hot-list"
+        res = requests.get(url, headers=headers, timeout=10).json()
         
-    draw_newsnow_style_list(draw, "🔥 微博实时热搜", items)
+        # 提取前 8 条热榜标题
+        for item in res['data'][:8]:
+            title = item['target']['title']
+            items.append(title)
+            
+        if len(items) >= 5:
+            print("知乎热榜获取成功！")
+            
+    except Exception as e:
+        print("知乎获取报错:", e)
+        items = ["获取数据失败，请检查网络..."] * 8
+        
+    draw_newsnow_style_list(draw, "🔥 知乎实时热榜", items)
     push_image(img, page_id=1)
-
 # ================= 页面 2：GitHub 趋势 (免死金牌版) =================
 def page2_github():
     print("获取 GitHub 趋势...")
@@ -178,7 +167,7 @@ if __name__ == "__main__":
         print("错误: 请配置 GitHub Secrets")
         exit(1)
         
-    page1_weibo()
+    page1_zhihu()
     page2_github()
     page3_dashboard()
     print("全部执行完毕！")
