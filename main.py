@@ -222,7 +222,6 @@ def task_weather_dashboard():
     img = Image.new('1', (400, 300), color=255)
     draw = ImageDraw.Draw(img)
 
-    # 内部函数：偏移加粗（用于白底黑字的小字体）
     def draw_bold_text(draw, xy, text, font, fill=0, offset=1):
         """通过两次绘制（水平偏移1像素）模拟加粗"""
         x, y = xy
@@ -247,14 +246,12 @@ def task_weather_dashboard():
         today_high = today_weather['maxtempC']
         today_low = today_weather['mintempC']
         
-        forecasts = resp['weather'][1:3]  # 明天、后天
+        forecasts = resp['weather'][1:3]
         
-        # 获取当前北京时间
         now_utc = datetime.utcnow()
         now_beijing = now_utc + timedelta(hours=8)
         update_time = now_beijing.strftime("%H:%M")
         
-        # 标题行（不需要加粗）
         draw.text((20, 10), "津南区 | 天大北洋园", font=font_title, fill=0)
         time_text = f"更新: {update_time}"
         try:
@@ -264,21 +261,18 @@ def task_weather_dashboard():
             time_width = len(time_text) * 8
         draw.text((390 - time_width, 12), time_text, font=font_small, fill=0)
 
-        # 当前温度（48px，大字体本身较粗，不加粗）
         draw.text((25, 40), f"{curr_temp}°C", font=font_48, fill=0)
-        draw.text((25, 100), f"{today_low}°/{today_high}°", font=font_item, fill=0)
+        # 今日高低温度加粗
+        draw_bold_text(draw, (25, 100), f"{today_low}°/{today_high}°", font=font_item)
         draw.text((150, 45), f"{weather_text}", font=font_36, fill=0)
 
-        # 右侧卡片（黑底白字，对比度足够，不加粗）
         draw.rounded_rectangle([(235, 45), (385, 130)], radius=8, outline=0, fill=0)
         draw.text((245, 55), f"[湿] {humidity}%", font=font_small, fill=255)
         draw.text((245, 80), f"[风] {wind_scale}级", font=font_small, fill=255)
         draw.text((245, 105), f"☀️ 紫外线 {uv_index}", font=font_small, fill=255)
 
-        # 日出日落（加粗）
         draw_bold_text(draw, (25, 135), f"日出 {sunrise}   日落 {sunset}", font=font_item)
 
-        # 未来两天预报（全部加粗）
         draw.line([(20, 160), (380, 160)], fill=0, width=1)
         x_positions = [30, 200]
         for i, day in enumerate(forecasts):
@@ -291,7 +285,6 @@ def task_weather_dashboard():
             draw_bold_text(draw, (x, 200), weather_desc, font=font_item)
             draw_bold_text(draw, (x, 220), f"{low}°~{high}°", font=font_item)
 
-        # 穿衣建议（加粗）
         advice = get_clothing_advice(curr_temp)
         draw.line([(20, 250), (380, 250)], fill=0, width=1)
         advice_lines = [advice[i:i+18] for i in range(0, len(advice), 18)]
